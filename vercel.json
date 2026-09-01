@@ -1,6 +1,6 @@
 {
   "cleanUrls": true,
-  "public": true,
+  "outputDirectory": "public",
   "rewrites": [
     { "source": "/customer-portal", "destination": "/customer.html" },
     { "source": "/((?!api/|customer.html|app.js|customer-portal).*)", "destination": "/index.html" }
