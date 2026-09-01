@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+package-lock.json.bak
+
+# Production Build Output
+dist/
+
+# Environment variables & secrets (Never commit secrets)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Editor & OS system files
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db
+
+# Database storage
+pgdata/
+
+# Temporary Archives & Scratch Scripts
+database.zip
+*.pyc
+__pycache__/

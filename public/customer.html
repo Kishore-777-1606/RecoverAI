@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Complete Your Payment — RecoverAI Secure Checkout</title>
+  <!-- Plus Jakarta Sans Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f5ff',
+              100: '#e0ecff',
+              200: '#c7dcfe',
+              300: '#a1c4fd',
+              400: '#71a2fa',
+              500: '#437df3',
+              600: '#255fe6',
+              700: '#1d48c8',
+              800: '#1d3ca1',
+              900: '#1d357f',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes checkmark {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-checkmark {
+      animation: checkmark 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+  </style>
+</head>
+<body class="h-full text-slate-800 antialiased flex flex-col justify-between bg-slate-50 min-h-screen">
+
+  <!-- TOP BRANDING & SECURITY HEADER -->
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-xl bg-brand-600 flex items-center justify-center text-white shadow-xs">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+        </div>
+        <span class="text-base sm:text-lg font-bold tracking-tight text-slate-900">
+          Recover<span class="text-brand-600">AI</span>
+        </span>
+      </div>
+      <div class="flex items-center space-x-3 text-xs font-semibold text-slate-600">
+        <span class="flex items-center text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full text-[11px] sm:text-xs">
+          <i data-lucide="lock" class="w-3 h-3 mr-1 text-emerald-600"></i>
+          <span>256-bit Encrypted Checkout</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CUSTOMER CHECKOUT / SUCCESS CONTAINER -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 flex items-center justify-center">
+    <div id="customer-view-root" class="w-full">
+      
+      <!-- SKELETON LOADING STATE -->
+      <div id="loading-state" class="max-w-xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs animate-pulse">
+        <div class="h-6 bg-slate-200 rounded-md w-1/3 mb-4"></div>
+        <div class="h-10 bg-slate-200 rounded-md w-2/3 mb-6"></div>
+        <div class="h-24 bg-slate-100 rounded-xl mb-6"></div>
+        <div class="h-12 bg-slate-200 rounded-xl"></div>
+      </div>
+
+      <!-- RECOVERY CHECKOUT FORM (Hidden initially) -->
+      <div id="checkout-view" class="hidden max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+        
+        <!-- LEFT: Payment Details & Method Selection (7 Cols) -->
+        <div class="lg:col-span-7 space-y-6">
+          
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-8 shadow-xs">
+            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Complete your payment</h1>
+            <p class="text-slate-600 text-xs sm:text-sm mt-1">Your previous checkout attempt was interrupted. Complete the transaction securely below.</p>
+
+            <!-- Order / Merchant Card -->
+            <div class="mt-5 bg-slate-50 border border-slate-200 rounded-xl p-4 grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <span class="text-slate-500 font-medium block">Merchant</span>
+                <span id="merchant-name-val" class="font-bold text-slate-900 text-sm mt-0.5 block truncate">Acme Tech Solutions</span>
+              </div>
+              <div>
+                <span class="text-slate-500 font-medium block">Total Payable</span>
+                <span id="amount-val" class="font-extrabold text-brand-600 text-lg mt-0.5 block font-mono">₹1,499.00</span>
+              </div>
+              <div class="col-span-2 pt-2 border-t border-slate-200 flex items-center justify-between text-slate-500 text-[11px]">
+                <span class="flex items-center">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 mr-1 text-amber-500"></i>
+                  <span>Status: <strong class="text-emerald-700 font-semibold">Active &bull; Valid Link</strong></span>
+                </span>
+                <span class="text-slate-400">Zero duplicate charges guaranteed</span>
+              </div>
+            </div>
+
+            <!-- Payment Method Tabs -->
+            <div class="mt-6">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Select Payment Method</label>
+              <div class="grid grid-cols-4 gap-2" id="method-pills">
+                <button type="button" data-method="CARD" class="method-btn py-2 px-2.5 rounded-xl border border-brand-500 bg-brand-50/80 text-brand-700 text-xs font-bold flex flex-col items-center justify-center space-y-1 transition-all">
+                  <i data-lucide="credit-card" class="w-4 h-4"></i>
+                  <span>Card</span>
+                </button>
+                <button type="button" data-method="UPI" class="method-btn py-2 px-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-slate-700 text-xs font-semibold flex flex-col items-center justify-center space-y-1 transition-all">
+                  <i data-lucide="smartphone" class="w-4 h-4"></i>
+                  <span>UPI</span>
+                </button>
+                <button type="button" data-method="NET_BANKING" class="method-btn py-2 px-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-slate-700 text-xs font-semibold flex flex-col items-center justify-center space-y-1 transition-all">
+                  <i data-lucide="landmark" class="w-4 h-4"></i>
+                  <span>Net Banking</span>
+                </button>
+                <button type="button" data-method="WALLET" class="method-btn py-2 px-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white text-slate-700 text-xs font-semibold flex flex-col items-center justify-center space-y-1 transition-all">
+                  <i data-lucide="wallet" class="w-4 h-4"></i>
+                  <span>Wallet</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Dynamic Method Form Area -->
+            <div id="method-form-container" class="mt-5 space-y-4">
+              <!-- CARD FORM (Default) -->
+              <div id="card-form-box" class="space-y-3">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Card Number</label>
+                  <div class="relative">
+                    <input type="text" value="•••• •••• •••• 4242" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-mono text-slate-800 cursor-not-allowed">
+                    <span class="absolute right-3 top-2.5 text-xs font-bold text-slate-400">VISA / MC</span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Expiry Date</label>
+                    <input type="text" value="12 / 28" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-mono text-slate-800 cursor-not-allowed">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">CVV</label>
+                    <input type="password" value="•••" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-mono text-slate-800 cursor-not-allowed">
+                  </div>
+                </div>
+              </div>
+
+              <!-- UPI FORM -->
+              <div id="upi-form-box" class="hidden space-y-3">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Virtual Payment Address (VPA)</label>
+                  <input type="text" value="customer@okhdfcbank" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-mono text-slate-800 cursor-not-allowed">
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="mt-6">
+              <button id="btn-pay-now" class="w-full py-3.5 px-6 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm sm:text-base shadow-xs flex items-center justify-center space-x-2 transition-all hover:scale-[1.01] active:scale-[0.99]">
+                <i data-lucide="lock" class="w-4 h-4"></i>
+                <span id="btn-pay-text">Complete Secure Payment</span>
+                <span id="btn-pay-spinner" class="hidden ml-2 animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+              </button>
+            </div>
+
+            <p class="text-center text-xs text-slate-400 mt-4 flex items-center justify-center">
+              <i data-lucide="shield" class="w-3.5 h-3.5 mr-1 text-emerald-600"></i>
+              Powered by RecoverAI Verified Settlement Engine
+            </p>
+
+          </div>
+        </div>
+
+        <!-- RIGHT: Trust & Guarantee Sidebar (5 Cols) -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Your Payment is Protected</h3>
+            
+            <div class="flex items-start space-x-3 text-xs text-slate-600">
+              <div class="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i data-lucide="check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <strong class="text-slate-800 block text-xs font-semibold">Zero Duplicate Charging</strong>
+                <span>Idempotency protection guarantees your card/account is only charged once.</span>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3 text-xs text-slate-600">
+              <div class="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i data-lucide="check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <strong class="text-slate-800 block text-xs font-semibold">Instant Order Settlement</strong>
+                <span>Your merchant receives real-time verification and confirms order delivery immediately.</span>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3 text-xs text-slate-600">
+              <div class="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <i data-lucide="check" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <strong class="text-slate-800 block text-xs font-semibold">Bank-Grade Tokenization</strong>
+                <span>Credentials never touch intermediate servers and are verified directly with the gateway.</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SUCCESS CONFIRMATION VIEW (Hidden initially) -->
+      <div id="success-view" class="hidden max-w-xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xs text-center">
+        
+        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-50 border-4 border-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-5 animate-checkmark">
+          <i data-lucide="check" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+        </div>
+
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Payment Successful!</h2>
+        <p class="text-slate-600 text-xs sm:text-sm mt-1 max-w-md mx-auto">Your payment has been successfully completed and verified. Your order is now active.</p>
+
+        <!-- Receipt Card -->
+        <div class="mt-6 bg-slate-50 border border-slate-200 rounded-2xl p-5 text-left space-y-3 font-mono text-xs">
+          <div class="flex justify-between pb-2 border-b border-slate-200">
+            <span class="text-slate-500 font-sans">Merchant</span>
+            <span id="succ-merchant" class="font-bold text-slate-800 font-sans">Acme Tech Solutions</span>
+          </div>
+          <div class="flex justify-between pb-2 border-b border-slate-200">
+            <span class="text-slate-500 font-sans">Amount Paid</span>
+            <span id="succ-amount" class="font-extrabold text-emerald-700 text-sm font-mono">₹1,499.00</span>
+          </div>
+          <div class="flex justify-between pb-2 border-b border-slate-200">
+            <span class="text-slate-500 font-sans">Transaction Reference</span>
+            <span id="succ-txn-id" class="text-slate-700 truncate max-w-[200px]">rec_txn_verified</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500 font-sans">Settlement Status</span>
+            <span class="text-emerald-600 font-bold font-sans flex items-center">
+              <i data-lucide="check-circle-2" class="w-3.5 h-3.5 mr-1"></i> VERIFIED & SETTLED
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a href="/#/dashboard" class="w-full sm:w-auto py-3 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition-colors">
+            Return to Dashboard
+          </a>
+        </div>
+
+      </div>
+
+      <!-- EXPIRED / INVALID TOKEN VIEW -->
+      <div id="expired-view" class="hidden max-w-lg mx-auto bg-white border border-slate-200 rounded-3xl p-8 text-center shadow-xs">
+        <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="clock" class="w-7 h-7"></i>
+        </div>
+        <h3 class="text-lg sm:text-xl font-bold text-slate-900">Recovery Link Expired or Invalid</h3>
+        <p class="text-slate-600 text-xs sm:text-sm mt-2">This payment recovery link is no longer active. Please contact your merchant support to request a fresh checkout link.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+    &copy; 2026 RecoverAI &bull; Secured with end-to-end cryptographic verification.
+  </footer>
+
+  <script>
+    // Extract recovery token from URL path (/customer/recovery/:token) or query (?token=...)
+    const pathParts = window.location.pathname.split('/');
+    let token = '';
+    const tokenIdx = pathParts.indexOf('recovery');
+    if (tokenIdx !== -1 && pathParts[tokenIdx + 1]) {
+      token = pathParts[tokenIdx + 1];
+    } else {
+      const urlParams = new URLSearchParams(window.location.search);
+      token = urlParams.get('token') || '';
+    }
+
+    let selectedMethod = 'CARD';
+
+    // Setup Method Pill Toggles
+    document.querySelectorAll('.method-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.method-btn').forEach(b => {
+          b.classList.remove('border-brand-500', 'bg-brand-50/80', 'text-brand-700', 'font-bold');
+          b.classList.add('border-slate-200', 'bg-white', 'text-slate-700', 'font-semibold');
+        });
+        btn.classList.remove('border-slate-200', 'bg-white', 'text-slate-700', 'font-semibold');
+        btn.classList.add('border-brand-500', 'bg-brand-50/80', 'text-brand-700', 'font-bold');
+        selectedMethod = btn.getAttribute('data-method');
+
+        if (selectedMethod === 'UPI') {
+          document.getElementById('card-form-box').classList.add('hidden');
+          document.getElementById('upi-form-box').classList.remove('hidden');
+        } else {
+          document.getElementById('card-form-box').classList.remove('hidden');
+          document.getElementById('upi-form-box').classList.add('hidden');
+        }
+      });
+    });
+
+    async function loadRecoveryLink() {
+      if (!token) {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('expired-view').classList.remove('hidden');
+        lucide.createIcons();
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/customer/recovery/${token}`, {
+          headers: { 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+
+        document.getElementById('loading-state').classList.add('hidden');
+
+        if (!res.ok || !data.success || data.data.status === 'EXPIRED' || data.data.status === 'USED') {
+          document.getElementById('expired-view').classList.remove('hidden');
+          lucide.createIcons();
+          return;
+        }
+
+        const info = data.data;
+        document.getElementById('merchant-name-val').textContent = info.merchantName || 'Merchant';
+        document.getElementById('amount-val').textContent = `₹${parseFloat(info.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        document.getElementById('checkout-view').classList.remove('hidden');
+        lucide.createIcons();
+      } catch (err) {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('expired-view').classList.remove('hidden');
+        lucide.createIcons();
+      }
+    }
+
+    // Handle Payment Checkout Submission
+    document.getElementById('btn-pay-now').addEventListener('click', async () => {
+      const btn = document.getElementById('btn-pay-now');
+      const text = document.getElementById('btn-pay-text');
+      const spinner = document.getElementById('btn-pay-spinner');
+
+      btn.disabled = true;
+      text.textContent = 'Processing & Verifying...';
+      spinner.classList.remove('hidden');
+
+      try {
+        const idempotencyKey = `cust_pay_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+        const res = await fetch(`/api/customer/recovery/${token}/pay`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paymentMethodId: selectedMethod,
+            idempotencyKey
+          })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success && (data.data?.status === 'SUCCESSFUL' || data.data?.status === 'CHARGED')) {
+          document.getElementById('checkout-view').classList.add('hidden');
+          document.getElementById('succ-merchant').textContent = document.getElementById('merchant-name-val').textContent;
+          document.getElementById('succ-amount').textContent = document.getElementById('amount-val').textContent;
+          document.getElementById('succ-txn-id').textContent = data.data.transactionId || 'mock_txn_verified';
+          document.getElementById('success-view').classList.remove('hidden');
+        } else {
+          alert(`Payment could not be processed: ${data.error?.message || 'Gateway declined attempt'}`);
+          btn.disabled = false;
+          text.textContent = 'Complete Secure Payment';
+          spinner.classList.add('hidden');
+        }
+      } catch (err) {
+        alert('Network communication failure. Please try again.');
+        btn.disabled = false;
+        text.textContent = 'Complete Secure Payment';
+        spinner.classList.add('hidden');
+      }
+      lucide.createIcons();
+    });
+
+    loadRecoveryLink();
+  </script>
+</body>
+</html>

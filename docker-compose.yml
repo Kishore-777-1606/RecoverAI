@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: recoverai-postgres
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-recoverai}
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Mount schema and corrected seed directly into init folder
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER:-postgres} -d ${DATABASE_NAME:-recoverai}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: recoverai-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - APP_MODE=${APP_MODE:-demo}
+      # The database url points to the pg container hostname 'postgres' inside the network
+      - DATABASE_URL=postgresql://${DATABASE_USER:-postgres}:${DATABASE_PASSWORD:-postgres}@postgres:5432/${DATABASE_NAME:-recoverai}
+      - PAYMENT_PROVIDER=${PAYMENT_PROVIDER:-mock}
+      - NOTIFICATION_PROVIDER=${NOTIFICATION_PROVIDER:-simulation}
+      - NOTIFICATION_MODE=${NOTIFICATION_MODE:-simulation}
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-mock_key_id}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-mock_key_secret}
+      - WEBHOOK_SHARED_SECRET=${WEBHOOK_SHARED_SECRET:-mock_webhook_secret}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_API_KEY_SID=${TWILIO_API_KEY_SID}
+      - TWILIO_API_KEY_SECRET=${TWILIO_API_KEY_SECRET}
+      - TWILIO_FROM_SMS=${TWILIO_FROM_SMS}
+      - TWILIO_FROM_WHATSAPP=${TWILIO_FROM_WHATSAPP}
+      - CUSTOMER_PORTAL_BASE_URL=${CUSTOMER_PORTAL_BASE_URL}
+      - PORT=3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+    driver: local

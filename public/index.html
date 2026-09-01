@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50 scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RecoverAI — Intelligent Autonomous Payment Recovery Platform</title>
+  <!-- Plus Jakarta Sans & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f5ff',
+              100: '#e0ecff',
+              200: '#c7dcfe',
+              300: '#a1c4fd',
+              400: '#71a2fa',
+              500: '#437df3',
+              600: '#255fe6',
+              700: '#1d48c8',
+              800: '#1d3ca1',
+              900: '#1d357f',
+              950: '#14214e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Clean custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    .badge-pulse {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.1); }
+    }
+
+    /* Subtly animated data flow line */
+    @keyframes flow-line {
+      0% { stroke-dashoffset: 24; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .animate-flow {
+      stroke-dasharray: 6 6;
+      animation: flow-line 1.2s linear infinite;
+    }
+
+    .no-select { user-select: none; }
+
+    /* ========================================================= */
+    /* SMOOTH SCROLL-REVEAL SYSTEM                               */
+    /* ========================================================= */
+    .reveal-item {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+
+    .reveal-item.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Stagger helpers */
+    .delay-100 { transition-delay: 100ms; }
+    .delay-200 { transition-delay: 200ms; }
+    .delay-300 { transition-delay: 300ms; }
+    .delay-400 { transition-delay: 400ms; }
+    .delay-500 { transition-delay: 500ms; }
+
+    /* ========================================================= */
+    /* TECH CURSOR EFFECT & PARTICLE CANVAS STYLING              */
+    /* ========================================================= */
+    #cursor-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9998;
+    }
+
+    #cursor-dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      background-color: #255fe6;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1), height 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, opacity 0.2s ease, transform 0.05s linear;
+      box-shadow: 0 0 12px rgba(37, 95, 230, 0.8), 0 0 24px rgba(37, 95, 230, 0.4);
+      opacity: 0;
+    }
+
+    #cursor-ring {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid rgba(37, 95, 230, 0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9997;
+      transform: translate(-50%, -50%);
+      transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, opacity 0.25s ease;
+      opacity: 0;
+    }
+
+    #cursor-dot.hovered {
+      width: 12px;
+      height: 12px;
+      background-color: #10b981;
+      border-color: #ffffff;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.9);
+    }
+
+    #cursor-ring.hovered {
+      width: 44px;
+      height: 44px;
+      border-color: rgba(16, 185, 129, 0.7);
+      background-color: rgba(16, 185, 129, 0.08);
+    }
+
+    /* Ambient Hero Background Movement */
+    @keyframes ambient-drift {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -20px) scale(1.08); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+    .animate-ambient {
+      animation: ambient-drift 12s ease-in-out infinite;
+    }
+
+    /* Prefers Reduced Motion Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      .reveal-item {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+      #cursor-dot, #cursor-ring, #cursor-canvas {
+        display: none !important;
+      }
+      .animate-ambient, .animate-flow, .badge-pulse {
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="h-full text-slate-800 antialiased selection:bg-brand-500 selection:text-white flex flex-col bg-slate-50 min-h-screen">
+
+  <!-- Tech Cursor Trail Particle Canvas & Follower Elements -->
+  <canvas id="cursor-canvas"></canvas>
+  <div id="cursor-ring"></div>
+  <div id="cursor-dot"></div>
+
+  <!-- ========================================================= -->
+  <!-- 1. LANDING PAGE NAVBAR (Rendered when on Landing Page)     -->
+  <!-- ========================================================= -->
+  <header id="landing-navbar" class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Brand Logo -->
+        <a href="#/landing" class="flex items-center space-x-2.5 group">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-white"></i>
+          </div>
+          <div class="flex items-baseline space-x-1.5">
+            <span class="text-lg font-extrabold tracking-tight text-slate-900">
+              Recover<span class="text-brand-600">AI</span>
+            </span>
+            <span class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-brand-50 text-brand-700 border border-brand-200/80">Autonomous Engine</span>
+          </div>
+        </a>
+
+        <!-- Navigation Anchors -->
+        <nav class="hidden md:flex items-center space-x-6 text-xs font-semibold text-slate-600">
+          <a href="#the-problem" class="hover:text-slate-900 transition-colors">The Problem</a>
+          <a href="#how-it-works" class="hover:text-slate-900 transition-colors">How It Works</a>
+          <a href="#intelligence" class="hover:text-slate-900 transition-colors">AI Intelligence</a>
+          <a href="#multi-channel" class="hover:text-slate-900 transition-colors">Multi-Channel</a>
+          <a href="#merchant-control" class="hover:text-slate-900 transition-colors">Merchant Control</a>
+        </nav>
+
+        <!-- Right CTA Area -->
+        <div class="flex items-center space-x-3">
+          <a href="#/simulator" class="hidden sm:inline-flex items-center space-x-1 text-xs font-bold text-slate-700 hover:text-brand-600 px-3 py-1.5 rounded-lg transition-colors">
+            <span>Simulator Studio</span>
+          </a>
+          <a href="#/dashboard" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs flex items-center space-x-1.5 shadow-sm shadow-brand-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <span>Try RecoverAI</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- 2. MERCHANT APP NAVBAR (Rendered when inside App Routes)  -->
+  <!-- ========================================================= -->
+  <header id="app-navbar" class="hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Brand Logo & Platform Name -->
+        <div class="flex items-center space-x-3 lg:space-x-6 min-w-0">
+          <a href="#/landing" class="flex items-center space-x-2.5 group flex-shrink-0" title="Return to Public Landing Page">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
+              <i data-lucide="shield-alert" class="w-4 h-4 text-white"></i>
+            </div>
+            <div class="flex items-baseline space-x-1.5">
+              <span class="text-lg font-extrabold tracking-tight text-slate-900">
+                Recover<span class="text-brand-600">AI</span>
+              </span>
+              <span class="hidden xl:inline-block px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-slate-100 text-slate-600 border border-slate-200">Merchant Hub</span>
+            </div>
+          </a>
+
+          <!-- Primary Desktop Navigation Links -->
+          <nav class="hidden lg:flex items-center space-x-1" id="nav-links">
+            <a href="#/dashboard" data-route="dashboard" class="nav-item px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center space-x-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+              <span>Dashboard</span>
+            </a>
+            <a href="#/payments" data-route="payments" class="nav-item px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center space-x-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
+              <span>Payments</span>
+            </a>
+            <a href="#/recoveries" data-route="recoveries" class="nav-item px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center space-x-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Recoveries</span>
+            </a>
+            <a href="#/manual-review" data-route="manual-review" class="nav-item px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center space-x-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+              <span>Manual Review</span>
+              <span id="nav-manual-badge" class="hidden ml-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800">0</span>
+            </a>
+            <a href="#/policies" data-route="policies" class="nav-item px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center space-x-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+              <span>Policies</span>
+            </a>
+            <a href="#/simulator" data-route="simulator" class="nav-item px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center space-x-1.5 text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200/60">
+              <i data-lucide="play-circle" class="w-3.5 h-3.5 text-brand-600"></i>
+              <span>Simulator</span>
+            </a>
+            <a href="#/recovery-studio" data-route="recovery-studio" class="nav-item px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center space-x-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-600"></i>
+              <span>AI Studio</span>
+            </a>
+          </nav>
+        </div>
+
+        <!-- Right Side Badges, Tenant Context & Mobile Menu Toggle -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          
+          <!-- Simulation Mode Badge -->
+          <div class="hidden sm:flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700 border border-purple-200 shadow-xs">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-600 mr-1.5 badge-pulse"></span>
+            <span>Simulation Mode</span>
+          </div>
+
+          <!-- Merchant Switcher Scope -->
+          <div class="relative">
+            <select id="merchant-selector" class="bg-white border border-slate-200 text-slate-800 text-xs font-semibold rounded-lg px-2.5 py-1.5 pr-6 focus:ring-2 focus:ring-brand-500 focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[210px] truncate shadow-xs">
+              <option value="d9b04245-c1e1-455f-bb54-df25c3453b3f" selected>Acme Tech Solutions</option>
+              <option value="c4e85618-0a67-4057-b90d-8fb03d244485">Beta Marketplace Corp</option>
+            </select>
+          </div>
+
+          <!-- Demo Reset Trigger -->
+          <button id="btn-demo-reset" title="Clean reset of demo test sessions" class="p-1.5 sm:p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition-colors shadow-xs">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Mobile Hamburger Menu Button -->
+          <button id="btn-mobile-menu" class="lg:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-200">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer / Dropdown -->
+    <div id="mobile-nav-menu" class="hidden lg:hidden border-t border-slate-200 bg-white px-4 py-3 space-y-1">
+      <a href="#/dashboard" class="mobile-nav-item flex items-center space-x-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100">
+        <i data-lucide="layout-dashboard" class="w-4 h-4 text-slate-500"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#/payments" class="mobile-nav-item flex items-center space-x-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100">
+        <i data-lucide="credit-card" class="w-4 h-4 text-slate-500"></i>
+        <span>Payments Ledger</span>
+      </a>
+      <a href="#/recoveries" class="mobile-nav-item flex items-center space-x-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100">
+        <i data-lucide="refresh-cw" class="w-4 h-4 text-slate-500"></i>
+        <span>Recovery Campaigns</span>
+      </a>
+      <a href="#/manual-review" class="mobile-nav-item flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100">
+        <div class="flex items-center space-x-2.5">
+          <i data-lucide="user-check" class="w-4 h-4 text-slate-500"></i>
+          <span>Manual Review</span>
+        </div>
+        <span id="nav-manual-mobile-badge" class="hidden px-2 py-0.5 text-xs font-bold rounded-full bg-amber-100 text-amber-800">0</span>
+      </a>
+      <a href="#/policies" class="mobile-nav-item flex items-center space-x-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100">
+        <i data-lucide="sliders" class="w-4 h-4 text-slate-500"></i>
+        <span>Policy Rules</span>
+      </a>
+      <a href="#/simulator" class="mobile-nav-item flex items-center space-x-2.5 px-3 py-2 rounded-lg text-sm font-bold text-brand-700 bg-brand-50">
+        <i data-lucide="play-circle" class="w-4 h-4 text-brand-600"></i>
+        <span>Simulator Studio</span>
+      </a>
+      <a href="#/recovery-studio" class="mobile-nav-item flex items-center space-x-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-purple-700 hover:bg-purple-50">
+        <i data-lucide="sparkles" class="w-4 h-4 text-purple-600"></i>
+        <span>AI Intelligence Studio</span>
+      </a>
+      <div class="pt-2 border-t border-slate-100">
+        <a href="#/landing" class="mobile-nav-item flex items-center space-x-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-800">
+          <i data-lucide="globe" class="w-4 h-4"></i>
+          <span>Back to Landing Page</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- NOTIFICATION BANNER (Global Toast Container) -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
+  <!-- MAIN VIEWPORT CONTAINER (Dynamic Single Page App Injection) -->
+  <main id="app-root" class="flex-1 w-full transition-opacity duration-150">
+    <!-- View content dynamically rendered via app.js -->
+  </main>
+
+  <!-- Core Application Scripts -->
+  <script src="/app.js"></script>
+  <script>
+    // Setup Mobile Navigation Toggle
+    document.getElementById('btn-mobile-menu')?.addEventListener('click', () => {
+      const menu = document.getElementById('mobile-nav-menu');
+      menu.classList.toggle('hidden');
+    });
+
+    document.querySelectorAll('.mobile-nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.getElementById('mobile-nav-menu')?.classList.add('hidden');
+      });
+    });
+  </script>
+</body>
+</html>
