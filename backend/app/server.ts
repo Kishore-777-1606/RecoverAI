@@ -1,17 +1,22 @@
 import app from './app';
 import { env } from '../config/env';
-import { closeDatabaseConnection } from '../database/connection';
+import { pool, closeDatabaseConnection } from '../database/connection';
+import { ensureDatabaseMigrated } from '../database/autoMigrate';
 import { logger } from '../shared/logging/logger';
 
 const PORT = process.env.PORT || 3000;
 
-const server = app.listen(PORT, () => {
+// Start server and automatically run migrations if empty database
+const server = app.listen(PORT, async () => {
   logger.info('RecoverAI Backend successfully initialized', {
     port: PORT,
     mode: env.APP_MODE,
     paymentProvider: env.PAYMENT_PROVIDER,
     notificationProvider: env.NOTIFICATION_PROVIDER
   });
+
+  // Run auto-migration for Render database
+  await ensureDatabaseMigrated(pool);
 });
 
 /**
