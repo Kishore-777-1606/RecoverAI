@@ -2,14 +2,16 @@ import { Pool, QueryResult, QueryResultRow } from 'pg';
 import { env } from '../config/env';
 import { logger } from '../shared/logging/logger';
 
-// Create a singleton connection pool
+// Check if external cloud database connection requires SSL (Render / Supabase / Neon / AWS)
+const isLocalhost = env.DATABASE_URL.includes('localhost') || env.DATABASE_URL.includes('127.0.0.1') || env.DATABASE_URL.includes('recoverai-postgres');
+
+// Create a singleton connection pool with automatic SSL support for cloud PostgreSQL
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
-  // 5-second connection timeout
-  connectionTimeoutMillis: 5000,
-  // Keep connections active for up to 30 seconds idle
+  ssl: isLocalhost ? false : { rejectUnauthorized: false },
+  connectionTimeoutMillis: 10000,
   idleTimeoutMillis: 30000,
-  max: 10 // Limit pool size for lightweight monolithic MVP
+  max: 10
 });
 
 // Register pool level error handler
