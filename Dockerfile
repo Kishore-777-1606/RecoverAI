@@ -29,6 +29,9 @@ RUN npm ci --only=production
 # Copy compiled transpiled JavaScript code from builder
 COPY --from=builder /usr/src/app/dist ./dist
 COPY public ./public
+COPY database ./database
+COPY database/schema.sql ./schema.sql
+COPY database/seed.sql ./seed.sql
 
 EXPOSE 3000
 
