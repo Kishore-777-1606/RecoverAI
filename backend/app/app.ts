@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import routes from './routes';
 import { requestLogger } from '../middleware/requestLogger';
 import { errorHandler } from '../middleware/errorHandler';
@@ -10,6 +11,13 @@ registerPaymentHandlers();
 registerRecoveryHandlers();
 
 const app = express();
+
+// Enable Cross-Origin Resource Sharing (CORS) for decoupled Vercel frontend & external clients
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-merchant-id', 'Accept']
+}));
 
 // Enable request bodies parsing
 app.use(express.json());

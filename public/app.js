@@ -17,6 +17,10 @@ const state = {
   policy: null,
 };
 
+// Automatic API Base URL resolution:
+// If running on decoupled frontend (e.g. Vercel), reads window.RECOVERAI_API_URL or defaults to current origin.
+const API_BASE_URL = (typeof window !== 'undefined' && window.RECOVERAI_API_URL) ? window.RECOVERAI_API_URL.replace(/\/$/, '') : '';
+
 // ==========================================
 // FORMATTING & DATA UTILITIES
 // ==========================================
@@ -91,12 +95,14 @@ async function api(path, options = {}) {
     ...(options.headers || {})
   };
 
+  const fullUrl = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+
   try {
-    const res = await fetch(path, { ...options, headers });
+    const res = await fetch(fullUrl, { ...options, headers });
     const data = await res.json();
     return { ok: res.ok, status: res.status, data };
   } catch (err) {
-    console.error('API Error:', path, err);
+    console.error('API Error:', fullUrl, err);
     return { ok: false, status: 500, error: err.message };
   }
 }

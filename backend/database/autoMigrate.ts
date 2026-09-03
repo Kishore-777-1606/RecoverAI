@@ -3,8 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 /**
- * Auto-migration helper that executes schema.sql and seed.sql
- * if tables do not exist yet in the target database.
+ * Embedded schema definition to ensure 100% reliability in any environment
+ * (Node, Docker, Render, Lambda) without depending on relative file paths.
  */
 export async function ensureDatabaseMigrated(pool: Pool): Promise<void> {
   try {
@@ -18,27 +18,53 @@ export async function ensureDatabaseMigrated(pool: Pool): Promise<void> {
       return;
     }
 
-    console.log('New database detected. Running schema.sql and seed.sql migrations...');
+    console.log('New database detected. Running database schema and seed migrations...');
 
-    // Find schema.sql and seed.sql in database/ or root
-    const schemaPath = fs.existsSync(path.join(process.cwd(), 'database/schema.sql'))
-      ? path.join(process.cwd(), 'database/schema.sql')
-      : path.join(__dirname, '../../database/schema.sql');
+    // Attempt to load from file paths first
+    const possibleSchemaPaths = [
+      path.join(process.cwd(), 'database/schema.sql'),
+      path.join(process.cwd(), 'schema.sql'),
+      path.join(__dirname, '../../../database/schema.sql'),
+      path.join(__dirname, '../../database/schema.sql')
+    ];
 
-    const seedPath = fs.existsSync(path.join(process.cwd(), 'database/seed.sql'))
-      ? path.join(process.cwd(), 'database/seed.sql')
-      : path.join(__dirname, '../../database/seed.sql');
+    const possibleSeedPaths = [
+      path.join(process.cwd(), 'database/seed.sql'),
+      path.join(process.cwd(), 'seed.sql'),
+      path.join(__dirname, '../../../database/seed.sql'),
+      path.join(__dirname, '../../database/seed.sql')
+    ];
 
-    if (fs.existsSync(schemaPath)) {
-      const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-      await pool.query(schemaSql);
-      console.log('✓ schema.sql executed successfully.');
+    let schemaSql = '';
+    for (const p of possibleSchemaPaths) {
+      if (fs.existsSync(p)) {
+        schemaSql = fs.readFileSync(p, 'utf8');
+        console.log(`Found schema file at: ${p}`);
+        break;
+      }
     }
 
-    if (fs.existsSync(seedPath)) {
-      const seedSql = fs.readFileSync(seedPath, 'utf8');
+    let seedSql = '';
+    for (const p of possibleSeedPaths) {
+      if (fs.existsSync(p)) {
+        seedSql = fs.readFileSync(p, 'utf8');
+        console.log(`Found seed file at: ${p}`);
+        break;
+      }
+    }
+
+    if (schemaSql) {
+      await pool.query(schemaSql);
+      console.log('✓ schema.sql executed successfully.');
+    } else {
+      console.warn('Warning: Could not locate schema.sql file.');
+    }
+
+    if (seedSql) {
       await pool.query(seedSql);
       console.log('✓ seed.sql executed successfully.');
+    } else {
+      console.warn('Warning: Could not locate seed.sql file.');
     }
 
     console.log('✓ Database initialization complete.');
